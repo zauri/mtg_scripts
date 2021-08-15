@@ -4,77 +4,113 @@
 Created on Mon May 17 16:22:35 2021
 
 @author: zauri
+@author: Kannan Thambiah <pygospa@gmail.com>
 """
 
 import json
 import pandas as pd
 
-def get_card_names(input_file):  
-    data = read_json(input_file)
-    #data = filter_out_etched_foils(data)
-    #data = filter_out_arena_cards(data)
-    data = filter_out_special_cards(data)
-    data = sort_ascending_by_number(data)
-    card_names = filter_out_duplicates(data)
-    
-    return card_names
+
+def get_cards(json_data):
+    json_data = filter_out_special_cards(json_data)
+    json_data = sort_ascending_by_number(json_data)
+    json_data = process_doublefaced(json_data)
+    card_dict = reduce_json_to_dict(json_data)
+
+    return card_dict
 
 
 def read_json(input_file):
     with open(input_file) as file:
-        data = json.load(file)
-        
-    return data
+        json_file = json.load(file)
+    return json_file
 
 
-def filter_out_special_cards(data):
-    return [x for x in data['data']['cards'] if 'e' not in x['number'] and \
-            '†' not in x['number']]
+def filter_out_special_cards(json_file):
+    cards = [card for card in json_file['data']['cards'] if \
+            'e' not in card['number'] and '†' not in card['number']]
+    json_file['data']['cards'] = cards
+    return json_file
 
 
-def filter_out_etched_foils(data):
-    return [x for x in data['data']['cards'] if 'e' not in x['number']]
-
-def filter_out_arena_cards(data):
-    return [x for x in data['data']['cards'] if '†' not in x['number']]
-
-
-def sort_ascending_by_number(data):
-    names = []
-    ascending_numbers = sorted(data, key=lambda x: int(x['number']))
-    
-    for x in ascending_numbers:
-        names.append(x['name'])
-    
-    return names
+def sort_ascending_by_number(json_file):
+    sorting_attribute = lambda card: int(card['number'])
+    sorted_cards = sorted(json_file['data']['cards'], key=sorting_attribute)
+    sorted_tokens = sorted(json_file['data']['tokens'], key=sorting_attribute)
+    json_file['data']['cards'] = sorted_cards
+    json_file['data']['tokens'] = sorted_tokens
+    return json_file
 
 
-def filter_out_duplicates(names):
-    names_cleared = []
-    
-    for x in range(0, len(names)):
-        if names[x] == names[x-1] and '//' in names[x]:
-            pass
+def process_doublefaced(json_file):
+    unique_cards = []
+    prev_card = None
+
+    for card in json_file['data']['cards']:
+        if is_double_sided(prev_card, card):
+            prev_card['type'] = f"{prev_card['type']} // {card['type']}"
         else:
-            names_cleared.append(names[x])
-    
-    return names_cleared
+            unique_cards.append(card)
+        prev_card = card
+
+    json_file['data']['cards'] = unique_cards
+    return json_file
 
 
-def save_to_file(card_names, set_name):
-    card_names_dict = {'Name': card_names}
-    
-    df = pd.DataFrame(card_names_dict)
+def is_double_sided(prev_card, card):
+    return prev_card is not None \
+        and card['name'] == prev_card['name'] \
+        and '//' in card['name']
+
+
+def reduce_json_to_dict(json_file):
+    codes = []
+    names = []
+    numbers = []
+    types = []
+    colors = []
+    rarities = []
+
+    for card in json_file['data']['cards']:
+        codes.append(card['setCode'])
+        numbers.append(card['number'])
+        names.append(card['name'])
+        types.append(card['type'])
+        colors.append(card['colorIdentity'])
+        rarities.append(card['rarity'])
+
+    for token in json_file['data']['tokens']:
+        codes.append(token['setCode'])
+        numbers.append(token['number'])
+        names.append(token['name'])
+        types.append(token['type'])
+        colors.append(token['colorIdentity'])
+        rarities.append('')
+
+    cards_dict = {
+        'Set' : codes,
+        '#' : numbers,
+        'Name': names,
+        'Rarity': rarities,
+        'Type': types,
+        'Color':colors }
+
+    return cards_dict
+
+
+def save_to_file(cards_dict, set_name):
+    df = pd.DataFrame(cards_dict)
     df.index += 1
     
-    df.to_csv(set_name + '.csv')
+    df.to_csv(index=False, path_or_buf=set_name + '.csv')
     print('Your cardname file has been created! :) ')
 
 
 if __name__ == "__main__":
     input_file = input('Enter path to input file (json): ')
     set_name = input('Enter set name (e.g. stx): ')
-    
-    card_names = get_card_names(input_file)
-    save_to_file(card_names, set_name)
-    
+
+    json_data = read_json(input_file)
+    cards_dict = get_cards(json_data)
+    save_to_file(cards_dict, set_name)
+
