@@ -6,6 +6,7 @@ Created on Thu Aug 12 11:48:13 2021
 @author: Kannan Thambiah <pygospa@gmail.com>
 """
 
+import argparse
 import copy
 import mtg_json
 import unittest
@@ -39,8 +40,11 @@ class TestGetCardNames(unittest.TestCase):
             else:
                 expected_rarities.append('')
 
+        args = argparse.Namespace()
+        args.__dict__ = {'filter': True}
+
         # when...
-        cards_dict = mtg_json.get_cards(self.json)
+        cards_dict = mtg_json.get_cards(self.json, args)
 
         # then...
         self.assertEqual(type(cards_dict), dict)

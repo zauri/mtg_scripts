@@ -11,7 +11,6 @@ import argparse
 import json
 import os
 import pandas as pd
-import sys
 from natsort import natsorted
 
 
