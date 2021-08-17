@@ -14,8 +14,10 @@ import pandas as pd
 from natsort import natsorted
 
 
-def get_cards(json_data):
-    #json_data = filter_out_special_cards(json_data)
+def get_cards(json_data, parsed_arguments):
+    if (parsed_arguments.filter):
+        json_data = filter_out_special_cards(json_data)
+    
     json_data = sort_ascending_by_number(json_data)
     json_data = process_doublefaced(json_data)
     card_dict = reduce_json_to_dict(json_data)
@@ -110,10 +112,14 @@ def save_to_file(cards_dict, set_name):
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-f', '--filter', action='store_true')
+    parsed_arguments = parser.parse_args()
+    
     input_file = input('Enter path to input file (json): ')
     set_name = os.path.splitext(input_file)[0]
 
     json_data = read_json(input_file)
-    cards_dict = get_cards(json_data)
+    cards_dict = get_cards(json_data, parsed_arguments)
     save_to_file(cards_dict, set_name)
 
