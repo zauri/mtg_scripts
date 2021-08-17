@@ -11,6 +11,7 @@ import argparse
 import json
 import os
 import pandas as pd
+import sys
 from natsort import natsorted
 
 
@@ -114,11 +115,13 @@ def save_to_file(cards_dict, set_name):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('-f', '--filter', action='store_true',
-                        help='Filter out cards with non-numeric characters in \
-                            their number.')
+                        help='filter out cards with non-numeric characters in \
+                            their number')
+    parser.add_argument('filename', action='store', help='input json file \
+                        to process')
     parsed_arguments = parser.parse_args()
-    
-    input_file = input('Enter path to input file (json): ')
+
+    input_file = parsed_arguments.filename
     set_name = os.path.splitext(input_file)[0]
 
     json_data = read_json(input_file)
