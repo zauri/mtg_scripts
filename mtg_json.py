@@ -3,16 +3,17 @@
 """
 Created on Mon May 17 16:22:35 2021
 
-@author: zauri
+@author: Petra Wenzl
 @author: Kannan Thambiah <pygospa@gmail.com>
 """
 
 import json
+from natsort import natsorted
 import pandas as pd
 
 
 def get_cards(json_data):
-    json_data = filter_out_special_cards(json_data)
+    #json_data = filter_out_special_cards(json_data)
     json_data = sort_ascending_by_number(json_data)
     json_data = process_doublefaced(json_data)
     card_dict = reduce_json_to_dict(json_data)
@@ -34,9 +35,9 @@ def filter_out_special_cards(json_file):
 
 
 def sort_ascending_by_number(json_file):
-    sorting_attribute = lambda card: int(card['number'])
-    sorted_cards = sorted(json_file['data']['cards'], key=sorting_attribute)
-    sorted_tokens = sorted(json_file['data']['tokens'], key=sorting_attribute)
+    sorting_attribute = lambda card: card['number']
+    sorted_cards = natsorted(json_file['data']['cards'], key=sorting_attribute)
+    sorted_tokens = natsorted(json_file['data']['tokens'], key=sorting_attribute)
     json_file['data']['cards'] = sorted_cards
     json_file['data']['tokens'] = sorted_tokens
     return json_file
