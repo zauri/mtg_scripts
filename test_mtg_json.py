@@ -7,7 +7,7 @@ Created on Thu Aug 12 11:48:13 2021
 """
 
 import copy
-import get_card_names as gcn
+import mtg_json
 import unittest
 
 
@@ -40,7 +40,7 @@ class TestGetCardNames(unittest.TestCase):
                 expected_rarities.append('')
 
         # when...
-        cards_dict = gcn.get_cards(self.json)
+        cards_dict = mtg_json.get_cards(self.json)
 
         # then...
         self.assertEqual(type(cards_dict), dict)
@@ -53,13 +53,13 @@ class TestGetCardNames(unittest.TestCase):
 
 
     def test_is_double_sided(self):
-        self.assertFalse(gcn.is_double_sided(self.vorinclex, self.blex_front))
-        self.assertFalse(gcn.is_double_sided(self.blex_back, self.necromancy))
-        self.assertFalse(gcn.is_double_sided(self.necromancy, self.vorinclex))
-        self.assertFalse(gcn.is_double_sided(None, self.vorinclex))
-        self.assertFalse(gcn.is_double_sided(None, self.blex_front))
+        self.assertFalse(mtg_json.is_double_sided(self.vorinclex, self.blex_front))
+        self.assertFalse(mtg_json.is_double_sided(self.blex_back, self.necromancy))
+        self.assertFalse(mtg_json.is_double_sided(self.necromancy, self.vorinclex))
+        self.assertFalse(mtg_json.is_double_sided(None, self.vorinclex))
+        self.assertFalse(mtg_json.is_double_sided(None, self.blex_front))
 
-        self.assertTrue(gcn.is_double_sided(self.blex_front, self.blex_back))
+        self.assertTrue(mtg_json.is_double_sided(self.blex_front, self.blex_back))
 
     
     def test_process_doublefaced(self):
@@ -69,7 +69,7 @@ class TestGetCardNames(unittest.TestCase):
         self.assertEqual(len(dfcs), 2)
 
         # when...
-        json = gcn.process_doublefaced(self.json)
+        json = mtg_json.process_doublefaced(self.json)
 
         # then...
         self.assertEqual(len(json['data']['cards']), expected_len)
@@ -82,7 +82,7 @@ class TestGetCardNames(unittest.TestCase):
 
 
     def test_sort_by_card_number(self):
-        json = gcn.sort_ascending_by_number(self.json)
+        json = mtg_json.sort_ascending_by_number(self.json)
         prev_card = None
         
         for card in json['data']['cards']:
@@ -109,7 +109,7 @@ class TestGetCardNames(unittest.TestCase):
         expected_rarities = [card['rarity'] for card in given_cards] + ['', '']
 
         # when...
-        cards = gcn.reduce_json_to_dict(self.json)
+        cards = mtg_json.reduce_json_to_dict(self.json)
 
         # then...
         self.assertEqual(type(cards), dict)
