@@ -7,9 +7,11 @@ Created on Mon May 17 16:22:35 2021
 @author: Kannan Thambiah <pygospa@gmail.com>
 """
 
+import argparse
 import json
-from natsort import natsorted
+import os
 import pandas as pd
+from natsort import natsorted
 
 
 def get_cards(json_data):
@@ -109,7 +111,7 @@ def save_to_file(cards_dict, set_name):
 
 if __name__ == "__main__":
     input_file = input('Enter path to input file (json): ')
-    set_name = input('Enter set name (e.g. stx): ')
+    set_name = os.path.splitext(input_file)[0]
 
     json_data = read_json(input_file)
     cards_dict = get_cards(json_data)
