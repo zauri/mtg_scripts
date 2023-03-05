@@ -33,8 +33,14 @@ def read_json(input_file):
 
 def filter_out_special_cards(json_file):
     cards = [card for card in json_file['data']['cards'] if \
-            'e' not in card['number'] and '†' not in card['number']]
+            'e' not in card['number'] \
+            and '†' not in card['number']]
+
+    tokens = [token for token in json_file['data']['tokens'] if \
+            'CH' not in token['number']]
+
     json_file['data']['cards'] = cards
+    json_file['data']['tokens'] = tokens
     return json_file
 
 
