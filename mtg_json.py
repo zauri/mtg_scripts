@@ -17,7 +17,7 @@ from natsort import natsorted
 def get_cards(json_data, parsed_arguments):
     if (parsed_arguments.filter):
         json_data = filter_out_special_cards(json_data)
-    
+
     json_data = sort_ascending_by_number(json_data)
     json_data = process_doublefaced(json_data)
     card_dict = reduce_json_to_dict(json_data)
@@ -32,12 +32,12 @@ def read_json(input_file):
 
 
 def filter_out_special_cards(json_file):
-    cards = [card for card in json_file['data']['cards'] if \
-            'e' not in card['number'] \
-            and '†' not in card['number']]
+    cards = [card for card in json_file['data']['cards'] if
+             'e' not in card['number']
+             and '†' not in card['number']]
 
-    tokens = [token for token in json_file['data']['tokens'] if \
-            'CH' not in token['number']]
+    tokens = [token for token in json_file['data']['tokens'] if
+              'CH' not in token['number']]
 
     json_file['data']['cards'] = cards
     json_file['data']['tokens'] = tokens
@@ -45,9 +45,10 @@ def filter_out_special_cards(json_file):
 
 
 def sort_ascending_by_number(json_file):
-    sorting_attribute = lambda card: card['number']
-    sorted_cards = natsorted(json_file['data']['cards'], key=sorting_attribute)
-    sorted_tokens = natsorted(json_file['data']['tokens'], key=sorting_attribute)
+    sorted_cards = natsorted(json_file['data']['cards'],
+                             key=lambda card: card['number'])
+    sorted_tokens = natsorted(json_file['data']['tokens'],
+                              key=lambda card: card['number'])
     json_file['data']['cards'] = sorted_cards
     json_file['data']['tokens'] = sorted_tokens
     return json_file
@@ -99,20 +100,23 @@ def reduce_json_to_dict(json_file):
         rarities.append('')
 
     cards_dict = {
-        'Set' : codes,
-        '#' : numbers,
+        'Set': codes,
+        '#': numbers,
         'Name': names,
         'Rarity': rarities,
         'Type': types,
-        'Color':colors }
+        'Color': colors}
 
     return cards_dict
 
 
 def save_to_file(cards_dict, set_name):
     df = pd.DataFrame(cards_dict)
+    df['Normal'] = ''
+    df['Foil'] = ''
+    df['Booster'] = ''
     df.index += 1
-    
+
     df.to_csv(index=False, path_or_buf=set_name + '.csv')
     print('Your cardname file has been created! :) ')
 
@@ -122,8 +126,8 @@ if __name__ == "__main__":
     parser.add_argument('-f', '--filter', action='store_true',
                         help='filter out cards with non-numeric characters in \
                             their number')
-    parser.add_argument('filename', action='store', help='input json file \
-                        to process')
+    parser.add_argument('filename', action='store',
+                        help='input json file to process')
     parsed_arguments = parser.parse_args()
 
     input_file = parsed_arguments.filename
@@ -132,4 +136,3 @@ if __name__ == "__main__":
     json_data = read_json(input_file)
     cards_dict = get_cards(json_data, parsed_arguments)
     save_to_file(cards_dict, set_name)
-
