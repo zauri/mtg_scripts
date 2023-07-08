@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Sat Jul 08 12:33:44 2023
+Created on Sat Jul 08 18:10:43 2023
 
 @author: Kannan Thambiah <pygospa@gmail.com>
 """
@@ -13,16 +13,18 @@ import pandas as pd
 
 def add_cards_to_db(db, count, booster, database_file):
     for _, card in count.iterrows():
-        index = db.index[(db['#'] == card['Card Number']) &
-                         (db['Set'] == card['Set Code'])]
+        index = db.index[(db['#'] == str(card["Collector's number"])) &
+                         (db['Set'] == card['Edition CODE'])]
 
         if len(index) > 0:
             index = index[0]
-            stock = db.at[index, card['Printing']]
+            printing = 'Foil' if card['Foil'] == 'Foil' else 'Normal'
+            stock = db.at[index, printing]
+
             if np.isnan(stock):
-                db.at[index, card['Printing']] = int(card['Quantity'])
+                db.at[index, printing] = int(card['Quantity'])
             else:
-                db.at[index, card['Printing']] = int(stock + card['Quantity'])
+                db.at[index, printing] = int(stock + card['Quantity'])
 
             if booster is not None:
                 boosters = db.at[index, 'Booster']
@@ -41,7 +43,7 @@ if __name__ == "__main__":
     parser.add_argument('-db', '--database', type=str, required=True,
                         help='Database file in CSV format')
     parser.add_argument('-c', '--countfile', type=str, required=True,
-                        help='File with count (in TCG-Player Format')
+                        help='File with count (in DelverLense Format')
     parser.add_argument('-b', '--booster', type=str, required=False,
                         help='Booster Number/Comment for field')
 
