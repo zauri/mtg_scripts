@@ -13,12 +13,16 @@ import pandas as pd
 
 def add_cards_to_db(db, count, booster, database_file):
     for _, card in count.iterrows():
-        index = db.index[(db['#'] == card['Card Number']) &
+        if card['Rarity'] == 'Token':
+            card['Set Code'] = f"T{card['Set Code']}"
+
+        index = db.index[(db['#'].astype(str) == str(card['Card Number'])) &
                          (db['Set'] == card['Set Code'])]
 
         if len(index) > 0:
             index = index[0]
             stock = db.at[index, card['Printing']]
+
             if np.isnan(stock):
                 db.at[index, card['Printing']] = int(card['Quantity'])
             else:
