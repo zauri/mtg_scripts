@@ -13,7 +13,7 @@ import pandas as pd
 
 def add_cards_to_db(db, count, booster, database_file):
     for _, card in count.iterrows():
-        index = db.index[(db['#'] == str(card["Collector's number"])) &
+        index = db.index[(db['#'].astype(str) == str(card["Collector's number"])) &
                          (db['Set'] == card['Edition CODE'])]
 
         if len(index) > 0:
